@@ -85,11 +85,12 @@ class DataResolver {
    * @param {BufferResolvable|Stream} resource The buffer or stream resolvable to resolve
    * @returns {Promise<Buffer|Stream>}
    */
+
   static async resolveFile(resource) {
     if (!browser && Buffer.isBuffer(resource)) return resource;
     if (browser && resource instanceof ArrayBuffer) return Util.convertToBuffer(resource);
-    // eslint-disable-next-line no-undef
     if (browser && resource instanceof Blob) return resource;
+    if (!browser && resource instanceof Object) return Buffer.from(resource);
     if (resource instanceof stream.Readable) return resource;
 
     if (typeof resource === 'string') {
