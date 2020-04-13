@@ -147,6 +147,8 @@ class WebSocketManager extends EventEmitter {
     URL: ${gatewayURL}
     Recommended Shards: ${recommendedShards}`);
 
+    console.log(`Recommended Shards Count: ${recommendedShards}`)
+
     this.debug(`Session Limit Information
     Total: ${total}
     Remaining: ${remaining}`);
