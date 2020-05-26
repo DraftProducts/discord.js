@@ -138,7 +138,7 @@ class RequestHandler {
       // Handle ratelimited requests
       if (res.status === 429) {
         // A ratelimit was hit - this should never happen
-        this.manager.client.emit('debug', `429 hit on route ${request.route}`);
+        console.error(`429 hit on route ${request.route}`);
         await Util.delayFor(this.retryAfter);
         return this.execute(request);
       }
@@ -164,7 +164,6 @@ class RequestHandler {
       request.retries++;
       return this.execute(request);
     }
-
     // Fallback in the rare case a status code outside the range 200..=599 is returned
     return null;
   }
