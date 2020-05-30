@@ -439,6 +439,7 @@ class Message extends Base {
    *   .catch(console.error);
    */
   edit(content, options) {
+    if(this.deleted) return;
     const { data } =
       content instanceof APIMessage ? content.resolveData() : APIMessage.create(this, content, options).resolveData();
     return this.client.api.channels[this.channel.id].messages[this.id].patch({ data }).then(d => {
@@ -518,6 +519,7 @@ class Message extends Base {
    *   .catch(console.error);
    */
   react(emoji) {
+    if(this.deleted) return;
     emoji = this.client.emojis.resolveIdentifier(emoji);
     if (!emoji) throw new TypeError('EMOJI_TYPE');
 
@@ -553,6 +555,7 @@ class Message extends Base {
     if (typeof options !== 'object') return Promise.reject(new TypeError('INVALID_TYPE', 'options', 'object', true));
     const { timeout = 0, reason } = options;
     if (timeout <= 0) {
+      if(this.deleted) return;
       return this.channel.messages.delete(this.id, reason).then(() => this);
     } else {
       return new Promise(resolve => {

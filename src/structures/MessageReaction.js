@@ -60,6 +60,7 @@ class MessageReaction {
    * @returns {Promise<MessageReaction>}
    */
   async remove() {
+    if(this.message.deleted) return;
     await this.client.api
       .channels(this.message.channel.id)
       .messages(this.message.id)
