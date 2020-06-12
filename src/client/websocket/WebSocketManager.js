@@ -147,8 +147,6 @@ class WebSocketManager extends EventEmitter {
     URL: ${gatewayURL}
     Recommended Shards: ${recommendedShards}`);
 
-    console.log(`Recommended Shards Count: ${recommendedShards}`)
-
     this.debug(`Session Limit Information
     Total: ${total}
     Remaining: ${remaining}`);
@@ -168,6 +166,8 @@ class WebSocketManager extends EventEmitter {
     this.shardQueue = new Set(shards.map(id => new WebSocketShard(this, id)));
 
     await this._handleSessionLimit(remaining, reset_after);
+
+    console.log(`Recommended Shards Count: ${recommendedShards}`)
 
     return this.createShards();
   }
