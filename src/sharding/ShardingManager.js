@@ -229,7 +229,7 @@ class ShardingManager extends EventEmitter {
   broadcastEval(script) {
     const promises = [];
     for (const shard of this.shards.values()) promises.push(shard.eval(script));
-    return Promise.all(promises);
+    return Promise.allSettled(promises);
   }
 
   /**
