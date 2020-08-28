@@ -1342,7 +1342,6 @@ declare module 'discord.js' {
     public manager: ShardingManager;
     public process: ChildProcess | null;
     public ready: boolean;
-    public worker: any | null;
     public eval(script: string): Promise<any>;
     public eval<T>(fn: (client: Client) => T): Promise<T[]>;
     public fetchClientValue(prop: string): Promise<any>;
@@ -1365,22 +1364,20 @@ declare module 'discord.js' {
   }
 
   export class ShardClientUtil {
-    constructor(client: Client, mode: ShardingManagerMode);
+    constructor(client: Client);
     private _handleMessage(message: any): void;
     private _respond(type: string, message: any): void;
 
     public client: Client;
     public readonly count: number;
     public readonly ids: number[];
-    public mode: ShardingManagerMode;
-    public parentPort: any | null;
     public broadcastEval(script: string): Promise<any[]>;
     public broadcastEval<T>(fn: (client: Client) => T): Promise<T[]>;
     public fetchClientValues(prop: string): Promise<any[]>;
     public respawnAll(shardDelay?: number, respawnDelay?: number, spawnTimeout?: number): Promise<void>;
     public send(message: any): Promise<void>;
 
-    public static singleton(client: Client, mode: ShardingManagerMode): ShardClientUtil;
+    public static singleton(client: Client): ShardClientUtil;
   }
 
   export class ShardingManager extends EventEmitter {
@@ -1389,7 +1386,6 @@ declare module 'discord.js' {
       options?: {
         totalShards?: number | 'auto';
         shardList?: number[] | 'auto';
-        mode?: ShardingManagerMode;
         respawn?: boolean;
         shardArgs?: string[];
         token?: string;
@@ -3100,8 +3096,6 @@ declare module 'discord.js' {
   }
 
   type RoleResolvable = Role | string;
-
-  type ShardingManagerMode = 'process' | 'worker';
 
   type Snowflake = string;
 

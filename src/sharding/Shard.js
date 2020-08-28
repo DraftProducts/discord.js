@@ -4,12 +4,12 @@ const EventEmitter = require('events');
 const path = require('path');
 const { Error } = require('../errors');
 const Util = require('../util/Util');
-let childProcess = null;
+let childProcess = require('child_process');
 let Worker = null;
 
 /**
  * A self-contained shard created by the {@link ShardingManager}. Each one has a {@link ChildProcess} that contains
- * an instance of the bot and its {@link Client}. When its child process/worker exits for any reason, the shard will
+ * an instance of the bot and its {@link Client}. When its child process exits for any reason, the shard will
  * spawn a new one to replace it as necessary.
  * @extends EventEmitter
  */
@@ -20,9 +20,6 @@ class Shard extends EventEmitter {
    */
   constructor(manager, id) {
     super();
-
-    if (manager.mode === 'process') childProcess = require('child_process');
-    else if (manager.mode === 'worker') Worker = require('worker_threads').Worker;
 
     /**
      * Manager that created the shard
@@ -37,19 +34,19 @@ class Shard extends EventEmitter {
     this.id = id;
 
     /**
-     * Arguments for the shard's process (only when {@link ShardingManager#mode} is `process`)
+     * Arguments for the shard's process)
      * @type {string[]}
      */
     this.args = manager.shardArgs || [];
 
     /**
-     * Arguments for the shard's process executable (only when {@link ShardingManager#mode} is `process`)
+     * Arguments for the shard's process executable)
      * @type {?string[]}
      */
     this.execArgv = manager.execArgv;
 
     /**
-     * Environment variables for the shard's process, or workerData for the shard's worker
+     * Environment variables for the shard's process
      * @type {Object}
      */
     this.env = Object.assign({}, process.env, {
@@ -66,16 +63,10 @@ class Shard extends EventEmitter {
     this.ready = false;
 
     /**
-     * Process of the shard (if {@link ShardingManager#mode} is `process`)
+     * Process of the shard
      * @type {?ChildProcess}
      */
     this.process = null;
-
-    /**
-     * Worker of the shard (if {@link ShardingManager#mode} is `worker`)
-     * @type {?Worker}
-     */
-    this.worker = null;
 
     /**
      * Ongoing promises for calls to {@link Shard#eval}, mapped by the `script` they were called with
@@ -100,7 +91,7 @@ class Shard extends EventEmitter {
   }
 
   /**
-   * Forks a child process or creates a worker thread for the shard.
+   * Forks a child process for the shard.
    * <warn>You should not need to call this manually.</warn>
    * @param {number} [spawnTimeout=30000] The amount in milliseconds to wait until the {@link Client} has become ready
    * before resolving. (-1 or Infinity for no wait)
@@ -108,33 +99,26 @@ class Shard extends EventEmitter {
    */
   async spawn(spawnTimeout = 30000) {
     if (this.process) throw new Error('SHARDING_PROCESS_EXISTS', this.id);
-    if (this.worker) throw new Error('SHARDING_WORKER_EXISTS', this.id);
 
-    if (this.manager.mode === 'process') {
-      this.process = childProcess
-        .fork(path.resolve(this.manager.file), this.args, {
-          env: this.env,
-          execArgv: this.execArgv,
-        })
-        .on('message', this._handleMessage.bind(this))
-        .on('exit', this._exitListener);
-    } else if (this.manager.mode === 'worker') {
-      this.worker = new Worker(path.resolve(this.manager.file), { workerData: this.env })
-        .on('message', this._handleMessage.bind(this))
-        .on('exit', this._exitListener);
-    }
+    this.process = childProcess
+    .fork(path.resolve(this.manager.file), this.args, {
+        env: this.env,
+        execArgv: this.execArgv,
+    })
+    .on('message', this._handleMessage.bind(this))
+    .on('exit', this._exitListener);
 
     this._evals.clear();
     this._fetches.clear();
 
     /**
-     * Emitted upon the creation of the shard's child process/worker.
+     * Emitted upon the creation of the shard's child process.
      * @event Shard#spawn
-     * @param {ChildProcess|Worker} process Child process/worker that was created
+     * @param {ChildProcess|Worker} process Child process that was created
      */
-    this.emit('spawn', this.process || this.worker);
+    this.emit('spawn', this.process);
 
-    if (spawnTimeout === -1 || spawnTimeout === Infinity) return this.process || this.worker;
+    if (spawnTimeout === -1 || spawnTimeout === Infinity) return this.process;
     await new Promise((resolve, reject) => {
       const cleanup = () => {
         clearTimeout(spawnTimeoutTimer);
@@ -168,27 +152,22 @@ class Shard extends EventEmitter {
       this.once('disconnect', onDisconnect);
       this.once('death', onDeath);
     });
-    return this.process || this.worker;
+    return this.process;
   }
 
   /**
-   * Immediately kills the shard's process/worker and does not restart it.
+   * Immediately kills the shard's process and does not restart it.
    */
   kill() {
-    if (this.process) {
-      this.process.removeListener('exit', this._exitListener);
-      this.process.kill();
-    } else {
-      this.worker.removeListener('exit', this._exitListener);
-      this.worker.terminate();
-    }
+    this.process.removeListener('exit', this._exitListener);
+    this.process.kill();
 
     this._handleExit(false);
   }
 
   /**
-   * Kills and restarts the shard's process/worker.
-   * @param {number} [delay=500] How long to wait between killing the process/worker and restarting it (in milliseconds)
+   * Kills and restarts the shard's process.
+   * @param {number} [delay=500] How long to wait between killing the process and restarting it (in milliseconds)
    * @param {number} [spawnTimeout=30000] The amount in milliseconds to wait until the {@link Client} has become ready
    * before resolving. (-1 or Infinity for no wait)
    * @returns {Promise<ChildProcess>}
@@ -200,21 +179,16 @@ class Shard extends EventEmitter {
   }
 
   /**
-   * Sends a message to the shard's process/worker.
+   * Sends a message to the shard's process.
    * @param {*} message Message to send to the shard
    * @returns {Promise<Shard>}
    */
   send(message) {
     return new Promise((resolve, reject) => {
-      if (this.process) {
         this.process.send(message, err => {
           if (err) reject(err);
           else resolve(this);
         });
-      } else {
-        this.worker.postMessage(message);
-        resolve(this);
-      }
     });
   }
 
@@ -235,18 +209,16 @@ class Shard extends EventEmitter {
     if (this._fetches.has(prop)) return this._fetches.get(prop);
 
     const promise = new Promise((resolve, reject) => {
-      const child = this.process || this.worker;
-
       const listener = message => {
         if (!message || message._fetchProp !== prop) return;
-        child.removeListener('message', listener);
+        this.process.removeListener('message', listener);
         this._fetches.delete(prop);
         resolve(message._result);
       };
-      child.on('message', listener);
+      this.process.on('message', listener);
 
       this.send({ _fetchProp: prop }).catch(err => {
-        child.removeListener('message', listener);
+        this.process.removeListener('message', listener);
         this._fetches.delete(prop);
         reject(err);
       });
@@ -269,7 +241,7 @@ class Shard extends EventEmitter {
     if (this._evals.has(script)) return this._evals.get(script);
 
     const promise = new Promise((resolve, reject) => {
-      const child = this.process || this.worker;
+      const child = this.process;
 
       const listener = message => {
         if (!message || message._eval !== script) return;
@@ -293,7 +265,7 @@ class Shard extends EventEmitter {
   }
 
   /**
-   * Handles a message received from the child process/worker.
+   * Handles a message received from the child process.
    * @param {*} message Message received
    * @private
    */
@@ -361,7 +333,7 @@ class Shard extends EventEmitter {
     }
 
     /**
-     * Emitted upon receiving a message from the child process/worker.
+     * Emitted upon receiving a message from the child process.
      * @event Shard#message
      * @param {*} message Message that was received
      */
@@ -369,21 +341,20 @@ class Shard extends EventEmitter {
   }
 
   /**
-   * Handles the shard's process/worker exiting.
+   * Handles the shard's process exiting.
    * @param {boolean} [respawn=this.manager.respawn] Whether to spawn the shard again
    * @private
    */
   _handleExit(respawn = this.manager.respawn) {
     /**
-     * Emitted upon the shard's child process/worker exiting.
+     * Emitted upon the shard's child process exiting.
      * @event Shard#death
-     * @param {ChildProcess|Worker} process Child process/worker that exited
+     * @param {ChildProcess} process Child process that exited
      */
-    this.emit('death', this.process || this.worker);
+    this.emit('death', this.process);
 
     this.ready = false;
     this.process = null;
-    this.worker = null;
     this._evals.clear();
     this._fetches.clear();
 

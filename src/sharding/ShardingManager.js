@@ -18,23 +18,15 @@ const Util = require('../util/Util');
  * @extends {EventEmitter}
  */
 class ShardingManager extends EventEmitter {
-  /**
-   * The mode to spawn shards with for a {@link ShardingManager}: either "process" to use child processes, or
-   * "worker" to use [Worker threads](https://nodejs.org/api/worker_threads.html).
-   * @typedef {Object} ShardingManagerMode
-   */
 
   /**
    * @param {string} file Path to your shard script file
    * @param {Object} [options] Options for the sharding manager
    * @param {string|number} [options.totalShards='auto'] Number of total shards of all shard managers or "auto"
    * @param {string|number[]} [options.shardList='auto'] List of shards to spawn or "auto"
-   * @param {ShardingManagerMode} [options.mode='process'] Which mode to use for shards
    * @param {boolean} [options.respawn=true] Whether shards should automatically respawn upon exiting
    * @param {string[]} [options.shardArgs=[]] Arguments to pass to the shard script when spawning
-   * (only available when using the `process` mode)
    * @param {string[]} [options.execArgv=[]] Arguments to pass to the shard script executable when spawning
-   * (only available when using the `process` mode)
    * @param {string} [options.token] Token to use for automatic shard count and passing to shards
    */
   constructor(file, options = {}) {
@@ -42,7 +34,6 @@ class ShardingManager extends EventEmitter {
     options = Util.mergeDefault(
       {
         totalShards: 'auto',
-        mode: 'process',
         respawn: true,
         shardArgs: [],
         execArgv: [],
@@ -97,28 +88,19 @@ class ShardingManager extends EventEmitter {
     }
 
     /**
-     * Mode for shards to spawn with
-     * @type {ShardingManagerMode}
-     */
-    this.mode = options.mode;
-    if (this.mode !== 'process' && this.mode !== 'worker') {
-      throw new RangeError('CLIENT_INVALID_OPTION', 'Sharding mode', '"process" or "worker"');
-    }
-
-    /**
      * Whether shards should automatically respawn upon exiting
      * @type {boolean}
      */
     this.respawn = options.respawn;
 
     /**
-     * An array of arguments to pass to shards (only when {@link ShardingManager#mode} is `process`)
+     * An array of arguments to pass to shards
      * @type {string[]}
      */
     this.shardArgs = options.shardArgs;
 
     /**
-     * An array of arguments to pass to the executable (only when {@link ShardingManager#mode} is `process`)
+     * An array of arguments to pass to the executable
      * @type {string[]}
      */
     this.execArgv = options.execArgv;
@@ -136,7 +118,6 @@ class ShardingManager extends EventEmitter {
     this.shards = new Collection();
 
     process.env.SHARDING_MANAGER = true;
-    process.env.SHARDING_MANAGER_MODE = this.mode;
     process.env.DISCORD_TOKEN = this.token;
   }
 
@@ -218,7 +199,8 @@ class ShardingManager extends EventEmitter {
   broadcast(message) {
     const promises = [];
     for (const shard of this.shards.values()) promises.push(shard.send(message));
-    return Promise.all(promises);
+    const responses = await Promise.allSettled(promises);
+    return responses.filter(r => r.status === 'fulfilled').map(res => res.value);
   }
 
   /**
@@ -226,10 +208,11 @@ class ShardingManager extends EventEmitter {
    * @param {string} script JavaScript to run on each shard
    * @returns {Promise<Array<*>>} Results of the script execution
    */
-  broadcastEval(script) {
+  async broadcastEval(script) {
     const promises = [];
     for (const shard of this.shards.values()) promises.push(shard.eval(script));
-    return Promise.allSettled(promises);
+    const responses = await Promise.allSettled(promises);
+    return responses.filter(r => r.status === 'fulfilled').map(res => res.value);
   }
 
   /**
@@ -246,7 +229,8 @@ class ShardingManager extends EventEmitter {
     if (this.shards.size !== this.shardList.length) return Promise.reject(new Error('SHARDING_IN_PROCESS'));
     const promises = [];
     for (const shard of this.shards.values()) promises.push(shard.fetchClientValue(prop));
-    return Promise.all(promises);
+    const responses = await Promise.allSettled(promises);
+    return responses.filter(r => r.status === 'fulfilled').map(res => res.value);
   }
 
   /**
