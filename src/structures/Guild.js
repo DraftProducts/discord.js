@@ -913,26 +913,6 @@ class Guild extends Base {
   }
 
   /**
-   * Fetches the guild widget.
-   * @returns {Promise<GuildWidget>}
-   * @example
-   * // Fetches the guild widget
-   * guild.fetchWidget()
-   *   .then(widget => console.log(`The widget is ${widget.enabled ? 'enabled' : 'disabled'}`))
-   *   .catch(console.error);
-   */
-  fetchWidget() {
-    return this.client.api
-      .guilds(this.id)
-      .widget.get()
-      .then(data => ({
-        enabled: data.enabled,
-        channel: data.channel_id ? this.channels.cache.get(data.channel_id) : null,
-      }));
-  }
-
-
-  /**
    * Fetches audit logs for this guild.
    * @param {Object} [options={}] Options for fetching audit logs
    * @param {Snowflake|GuildAuditLogsEntry} [options.before] Limit to entries from before specified entry
