@@ -92,6 +92,7 @@ class DataResolver {
     if (browser && resource instanceof Blob) return resource;
     if (!browser && resource instanceof Object) return Buffer.from(resource);
     if (resource instanceof stream.Readable) return resource;
+    
 
     if (typeof resource === 'string') {
       if (/^https?:\/\//.test(resource)) {

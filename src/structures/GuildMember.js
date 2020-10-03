@@ -70,6 +70,13 @@ class GuildMember extends Base {
   }
 
   _patch(data) {
+    if (typeof data.nick !== 'undefined') this.nickname = data.nick;
+
+    this._roles = [];
+    if (data) this._patch(data);
+  }
+
+  _patch(data) {
     if ('user' in data) {
       /**
        * The user that this guild member instance represents

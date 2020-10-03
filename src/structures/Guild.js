@@ -913,6 +913,26 @@ class Guild extends Base {
   }
 
   /**
+   * Fetches the guild widget.
+   * @returns {Promise<GuildWidget>}
+   * @example
+   * // Fetches the guild widget
+   * guild.fetchWidget()
+   *   .then(widget => console.log(`The widget is ${widget.enabled ? 'enabled' : 'disabled'}`))
+   *   .catch(console.error);
+   */
+  fetchWidget() {
+    return this.client.api
+      .guilds(this.id)
+      .widget.get()
+      .then(data => ({
+        enabled: data.enabled,
+        channel: data.channel_id ? this.channels.cache.get(data.channel_id) : null,
+      }));
+  }
+
+
+  /**
    * Fetches audit logs for this guild.
    * @param {Object} [options={}] Options for fetching audit logs
    * @param {Snowflake|GuildAuditLogsEntry} [options.before] Limit to entries from before specified entry
@@ -995,6 +1015,7 @@ class Guild extends Base {
    * @property {GuildMemberResolvable} [owner] The owner of the guild
    * @property {Base64Resolvable} [splash] The invite splash image of the guild
    * @property {Base64Resolvable} [discoverySplash] The discovery splash image of the guild
+   * @property {Base64Resolvable} [splash] The splash screen of the guild
    * @property {Base64Resolvable} [banner] The banner of the guild
    * @property {DefaultMessageNotifications|number} [defaultMessageNotifications] The default message notifications
    * @property {SystemChannelFlagsResolvable} [systemChannelFlags] The system channel flags of the guild
@@ -1409,6 +1430,26 @@ class Guild extends Base {
       })
       .then(() => this);
   }
+
+  /**
+   * Edits the guild's widget.
+   * @param {GuildWidgetData} widget The widget for the guild
+   * @param {string} [reason] Reason for changing the guild's widget
+   * @returns {Promise<Guild>}
+   */
+  setWidget(widget, reason) {
+    return this.client.api
+      .guilds(this.id)
+      .widget.patch({
+        data: {
+          enabled: widget.enabled,
+          channel_id: this.channels.resolveID(widget.channel),
+        },
+        reason,
+      })
+      .then(() => this);
+  }
+
 
   /**
    * Leaves the guild.

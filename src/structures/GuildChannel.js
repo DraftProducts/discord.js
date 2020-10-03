@@ -335,7 +335,7 @@ class GuildChannel extends Channel {
     }
 
     let permission_overwrites;
-
+    
     if (data.permissionOverwrites) {
       permission_overwrites = data.permissionOverwrites.map(o => PermissionOverwrites.resolve(o, this.guild));
     }

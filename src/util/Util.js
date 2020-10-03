@@ -25,8 +25,8 @@ class Util {
     if (!isObject(obj)) return obj;
 
     const objProps = Object.keys(obj)
-      .filter(k => !k.startsWith('_'))
-      .map(k => ({ [k]: true }));
+    .filter(k => !k.startsWith('_'))
+    .map(k => ({ [k]: true }));
 
     props = objProps.length ? Object.assign(...objProps, ...props) : Object.assign({}, ...props);
 

@@ -24,7 +24,7 @@ class TextChannel extends GuildChannel {
      * @type {MessageManager}
      */
     this.messages = new MessageManager(this);
-
+    	
     /**
      * If the guild considers this channel NSFW
      * @type {boolean}
