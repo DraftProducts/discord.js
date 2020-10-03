@@ -196,7 +196,7 @@ class ShardingManager extends EventEmitter {
    * @param {*} message Message to be sent to the shards
    * @returns {Promise<Shard[]>}
    */
-  broadcast(message) {
+  async broadcast(message) {
     const promises = [];
     for (const shard of this.shards.values()) promises.push(shard.send(message));
     const responses = await Promise.allSettled(promises);
@@ -224,7 +224,7 @@ class ShardingManager extends EventEmitter {
    *   .then(results => console.log(`${results.reduce((prev, val) => prev + val, 0)} total guilds`))
    *   .catch(console.error);
    */
-  fetchClientValues(prop) {
+  async fetchClientValues(prop) {
     if (this.shards.size === 0) return Promise.reject(new Error('SHARDING_NO_SHARDS'));
     if (this.shards.size !== this.shardList.length) return Promise.reject(new Error('SHARDING_IN_PROCESS'));
     const promises = [];
