@@ -1412,26 +1412,6 @@ class Guild extends Base {
   }
 
   /**
-   * Edits the guild's widget.
-   * @param {GuildWidgetData} widget The widget for the guild
-   * @param {string} [reason] Reason for changing the guild's widget
-   * @returns {Promise<Guild>}
-   */
-  setWidget(widget, reason) {
-    return this.client.api
-      .guilds(this.id)
-      .widget.patch({
-        data: {
-          enabled: widget.enabled,
-          channel_id: this.channels.resolveID(widget.channel),
-        },
-        reason,
-      })
-      .then(() => this);
-  }
-
-
-  /**
    * Leaves the guild.
    * @returns {Promise<Guild>}
    * @example
