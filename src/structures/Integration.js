@@ -58,7 +58,7 @@ class Integration extends Base {
      * @type {Role}
      */
     this.role = this.guild.roles.cache.get(data.role_id);
-    
+
     if (data.user) {
       /**
        * The user for this integration

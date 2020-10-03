@@ -1,11 +1,10 @@
 'use strict';
 
+let childProcess = require('child_process');
 const EventEmitter = require('events');
 const path = require('path');
 const { Error } = require('../errors');
 const Util = require('../util/Util');
-let childProcess = require('child_process');
-let Worker = null;
 
 /**
  * A self-contained shard created by the {@link ShardingManager}. Each one has a {@link ChildProcess} that contains
@@ -101,13 +100,13 @@ class Shard extends EventEmitter {
     if (this.process) throw new Error('SHARDING_PROCESS_EXISTS', this.id);
 
     this.process = childProcess
-    .fork(path.resolve(this.manager.file), this.args, {
+      .fork(path.resolve(this.manager.file), this.args, {
         env: this.env,
         execArgv: this.execArgv,
         silent: true,
-    })
-    .on('message', this._handleMessage.bind(this))
-    .on('exit', this._exitListener);
+      })
+      .on('message', this._handleMessage.bind(this))
+      .on('exit', this._exitListener);
 
     this._evals.clear();
     this._fetches.clear();
@@ -186,10 +185,10 @@ class Shard extends EventEmitter {
    */
   send(message) {
     return new Promise((resolve, reject) => {
-        this.process.send(message, err => {
-          if (err) reject(err);
-          else resolve(this);
-        });
+      this.process.send(message, err => {
+        if (err) reject(err);
+        else resolve(this);
+      });
     });
   }
 

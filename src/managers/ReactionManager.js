@@ -58,7 +58,7 @@ class ReactionManager extends BaseManager {
    * @returns {Promise<Message>}
    */
   removeAll() {
-    if(this.message.deleted) return;
+    if (this.message.deleted) return this.message;
     return this.client.api
       .channels(this.message.channel.id)
       .messages(this.message.id)

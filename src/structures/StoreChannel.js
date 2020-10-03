@@ -7,12 +7,12 @@ const GuildChannel = require('./GuildChannel');
  * @extends {GuildChannel}
  */
 class StoreChannel extends GuildChannel {
-   /**
-    * @param {*} guild The guild the store channel is part of
-    * @param {*} data The data for the store channel
-    */
-   constructor(guild, data) {
-     super(guild, data);
+  /**
+   * @param {*} guild The guild the store channel is part of
+   * @param {*} data The data for the store channel
+   */
+  constructor(guild, data) {
+    super(guild, data);
 
     /**
      * If the guild considers this channel NSFW
@@ -20,12 +20,12 @@ class StoreChannel extends GuildChannel {
      * @readonly
      */
     this.nsfw = Boolean(data.nsfw);
-}
+  }
 
-_patch(data) {
-  super._patch(data);
+  _patch(data) {
+    super._patch(data);
 
-  if (typeof data.nsfw !== 'undefined') this.nsfw = Boolean(data.nsfw);
+    if (typeof data.nsfw !== 'undefined') this.nsfw = Boolean(data.nsfw);
   }
 }
 

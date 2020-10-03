@@ -167,7 +167,7 @@ class WebSocketManager extends EventEmitter {
 
     await this._handleSessionLimit(remaining, reset_after);
 
-    console.log(`Recommended Shards Count: ${recommendedShards}`)
+    console.log(`Recommended Shards Count: ${recommendedShards}`);
 
     return this.createShards();
   }

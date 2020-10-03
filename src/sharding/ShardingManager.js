@@ -18,7 +18,6 @@ const Util = require('../util/Util');
  * @extends {EventEmitter}
  */
 class ShardingManager extends EventEmitter {
-
   /**
    * @param {string} file Path to your shard script file
    * @param {Object} [options] Options for the sharding manager

@@ -20,13 +20,13 @@ class ShardClientUtil {
 
     process.on('message', this._handleMessage.bind(this));
     client.on('ready', () => {
-        process.send({ _ready: true });
+      process.send({ _ready: true });
     });
     client.on('disconnect', () => {
-        process.send({ _disconnect: true });
+      process.send({ _disconnect: true });
     });
     client.on('reconnecting', () => {
-        process.send({ _reconnecting: true });
+      process.send({ _reconnecting: true });
     });
   }
 
@@ -56,10 +56,10 @@ class ShardClientUtil {
    */
   send(message) {
     return new Promise((resolve, reject) => {
-        process.send(message, err => {
-          if (err) reject(err);
-          else resolve();
-        });
+      process.send(message, err => {
+        if (err) reject(err);
+        else resolve();
+      });
     });
   }
 
@@ -75,7 +75,6 @@ class ShardClientUtil {
    */
   fetchClientValues(prop) {
     return new Promise((resolve, reject) => {
-
       const listener = message => {
         if (!message || message._sFetchProp !== prop) return;
         process.removeListener('message', listener);
