@@ -570,6 +570,9 @@ class GuildChannel extends Channel {
    * @readonly
    */
   get deletable() {
+    if (this.guild.rulesChannelID == this.id || this.type === 'news') {
+        return false;
+    }
     return this.permissionsFor(this.client.user).has(Permissions.FLAGS.MANAGE_CHANNELS, false);
   }
 
@@ -580,6 +583,9 @@ class GuildChannel extends Channel {
    */
   get manageable() {
     if (this.client.user.id === this.guild.ownerID) return true;
+    if (this.guild.rulesChannelID == this.id || this.type === 'news') {
+        return false;
+    }
     if (this.type === 'voice') {
       if (!this.permissionsFor(this.client.user).has(Permissions.FLAGS.CONNECT, false)) {
         return false;
