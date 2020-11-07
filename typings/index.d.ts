@@ -1381,11 +1381,7 @@ declare module 'discord.js' {
   }
 
   export class ShardingManager extends EventEmitter {
-    constructor(
-      file: string,
-      shardList: Object[]
-
-    );
+    constructor(file: string, shardList: Object[]);
 
     public file: string;
     public shards: Collection<number, Shard>;
