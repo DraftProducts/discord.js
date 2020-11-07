@@ -15,9 +15,12 @@ const Util = require('../util/Util');
 class Shard extends EventEmitter {
   /**
    * @param {ShardingManager} manager Manager that is creating this shard
-   * @param {number} id ID of this shard
+   * @param {Object} data Data of the shard to create
+   * @param {number} data.shardID ID of the shard to create
+   * @param {boolean} data.premium Premium status of the shard to create
+   * @param {boolean} data.custom Custom status of the shard to create
    */
-  constructor(manager, id) {
+  constructor(manager, data) {
     super();
 
     /**
@@ -30,19 +33,19 @@ class Shard extends EventEmitter {
      * ID of the shard in the manager
      * @type {number}
      */
-    this.id = id;
+    this.id = data.shardID;
 
     /**
      * Arguments for the shard's process)
      * @type {string[]}
      */
-    this.args = manager.shardArgs || [];
+    this.args = data.shardArgs || [];
 
     /**
      * Arguments for the shard's process executable)
      * @type {?string[]}
      */
-    this.execArgv = manager.execArgv;
+    this.execArgv = data.shardArgs;
 
     /**
      * Environment variables for the shard's process
@@ -50,9 +53,11 @@ class Shard extends EventEmitter {
      */
     this.env = Object.assign({}, process.env, {
       SHARDING_MANAGER: true,
-      SHARDS: this.id,
       SHARD_COUNT: this.manager.totalShards,
-      DISCORD_TOKEN: this.manager.token,
+      SHARDS: data.shardID,
+      TOKEN: data.token,
+      PREMIUM: !!data.premium,
+      CUSTOM: !!data.custom,
     });
 
     /**
@@ -60,6 +65,18 @@ class Shard extends EventEmitter {
      * @type {boolean}
      */
     this.ready = false;
+
+    /**
+     * Whether the shard's {@link Client} is premium
+     * @type {boolean}
+     */
+    this.premium = data.premium;
+
+    /**
+     * Whether the shard's {@link Client} is custom
+     * @type {boolean}
+     */
+    this.custom = data.custom;
 
     /**
      * Process of the shard
@@ -87,6 +104,8 @@ class Shard extends EventEmitter {
      * @private
      */
     this._exitListener = this._handleExit.bind(this);
+
+    this.token = data.token;
   }
 
   /**

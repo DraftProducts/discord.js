@@ -132,17 +132,6 @@ class Client extends BaseClient {
     this.presence = new ClientPresence(this);
 
     Object.defineProperty(this, 'token', { writable: true });
-    if (!this.token && 'DISCORD_TOKEN' in process.env) {
-      /**
-       * Authorization token for the logged in bot.
-       * If present, this defaults to `process.env.DISCORD_TOKEN` when instantiating the client
-       * <warn>This should be kept private at all times.</warn>
-       * @type {?string}
-       */
-      this.token = process.env.DISCORD_TOKEN;
-    } else {
-      this.token = null;
-    }
 
     /**
      * User that the client is logged in as
