@@ -77,14 +77,6 @@ class ShardingManager extends EventEmitter {
    * @returns {Promise<Collection<number, Shard>>}
    */
   async spawn(delay = 5500, spawnTimeout) {
-    if (this.shardList.some(shardID => shardID >= this.totalShards)) {
-      throw new RangeError(
-        'CLIENT_INVALID_OPTION',
-        'Amount of shards',
-        'bigger than the highest shardID in the shardList option.',
-      );
-    }
-
     // Spawn the shards
     for (const data of this.shardList) {
       const promises = [];
