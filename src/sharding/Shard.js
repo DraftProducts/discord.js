@@ -39,7 +39,12 @@ class Shard extends EventEmitter {
      * Arguments for the shard's process)
      * @type {string[]}
      */
-    this.args = data.shardArgs || [];
+    this.args = [
+      data.token,
+      data.premium ? 'premium' : 'regular',
+      data.custom ? 'custom' : 'regular',
+      ...(data.shardArgs || []),
+    ];
 
     /**
      * Arguments for the shard's process executable)
@@ -55,9 +60,6 @@ class Shard extends EventEmitter {
       SHARDING_MANAGER: true,
       SHARD_COUNT: this.manager.totalShards,
       SHARDS: data.shardID,
-      TOKEN: data.token,
-      PREMIUM: !!data.premium,
-      CUSTOM: !!data.custom,
     });
 
     /**
