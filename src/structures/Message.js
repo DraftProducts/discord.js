@@ -556,7 +556,10 @@ class Message extends Base {
     const { timeout = 0, reason } = options;
     if (timeout <= 0) {
       if (this.deleted) return null;
-      return this.channel.messages.delete(this.id, reason).then(() => this);
+      return this.channel.messages
+        .delete(this.id, reason)
+        .then(() => this)
+        .catch(() => null);
     } else {
       return new Promise(resolve => {
         this.client.setTimeout(() => {
