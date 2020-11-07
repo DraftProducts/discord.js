@@ -1383,19 +1383,11 @@ declare module 'discord.js' {
   export class ShardingManager extends EventEmitter {
     constructor(
       file: string,
-      options?: {
-        totalShards?: number | 'auto';
-        shardList?: number[] | 'auto';
-        respawn?: boolean;
-        shardArgs?: string[];
-        token?: string;
-        execArgv?: string[];
-      },
+      shardList: Object[]
+
     );
 
     public file: string;
-    public respawn: boolean;
-    public shardArgs: string[];
     public shards: Collection<number, Shard>;
     public token: string | null;
     public totalShards: number | 'auto';
@@ -1409,10 +1401,6 @@ declare module 'discord.js' {
       spawnTimeout?: number,
     ): Promise<Collection<number, Shard>>;
     public spawn(amount?: number | 'auto', delay?: number, spawnTimeout?: number): Promise<Collection<number, Shard>>;
-
-    public on(event: 'shardCreate', listener: (shard: Shard) => void): this;
-
-    public once(event: 'shardCreate', listener: (shard: Shard) => void): this;
   }
 
   export class SnowflakeUtil {
