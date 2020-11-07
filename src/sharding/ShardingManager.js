@@ -35,6 +35,12 @@ class ShardingManager extends EventEmitter {
     const stats = fs.statSync(this.file);
     if (!stats.isFile()) throw new Error('CLIENT_INVALID_OPTION', 'File', 'a file');
 
+    /**
+     * List of shards this sharding manager spawns
+     * @type {string|number[]}
+     */
+    this.shardList = shardList || [];
+
     if (!Array.isArray(shardList)) throw new TypeError('CLIENT_INVALID_OPTION', 'shardList', 'an array.');
     if (shardList.length < 1) throw new RangeError('CLIENT_INVALID_OPTION', 'shardList', 'at least 1 ID.');
 
