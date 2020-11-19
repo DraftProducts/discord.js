@@ -83,12 +83,19 @@ class ShardingManager extends EventEmitter {
    * @returns {Promise<Collection<number, Shard>>}
    */
   async spawn(delay = 5500, spawnTimeout) {
+    const premium_length = this.shardList.filter(s => s.premium).length;
     // Spawn the shards
     for (const data of this.shardList) {
       const promises = [];
       const shard = this.createShard(data);
       promises.push(shard.spawn(spawnTimeout));
-      if (delay > 0 && this.shards.size !== this.shardList.length) promises.push(Util.delayFor(delay));
+      if (
+        delay > 0 &&
+        this.shards.size !== this.shardList.length &&
+        (!data.premium || this.shards.size !== premium_length)
+      ) {
+        promises.push(Util.delayFor(delay));
+      }
       await Promise.all(promises); // eslint-disable-line no-await-in-loop
     }
 
