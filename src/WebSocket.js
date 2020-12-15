@@ -7,6 +7,8 @@ try {
   if (!erlpack.pack) erlpack = null;
 } catch {} // eslint-disable-line no-empty
 
+exports.WebSocket = require('ws');
+
 const ab = new TextDecoder();
 
 exports.encoding = erlpack ? 'etf' : 'json';
