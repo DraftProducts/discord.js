@@ -618,27 +618,6 @@ class Guild extends Base {
   }
 
   /**
-   * The voice state for the client user of this guild, if any
-   * @type {?VoiceState}
-   * @readonly
-   */
-  get voice() {
-    return this.voiceStates.cache.get(this.client.user.id);
-  }
-
-  /**
-   * Returns the GuildMember form of a User object, if the user is present in the guild.
-   * @param {UserResolvable} user The user that you want to obtain the GuildMember of
-   * @returns {?GuildMember}
-   * @example
-   * // Get the guild member of a user
-   * const member = guild.member(message.author);
-   */
-  member(user) {
-    return this.members.resolve(user);
-  }
-
-  /**
    * Fetches this guild.
    * @returns {Promise<Guild>}
    */
@@ -956,29 +935,25 @@ class Guild extends Base {
    * @param {boolean} [options.deaf] Whether the member should be deafened (requires `DEAFEN_MEMBERS`)
    * @returns {Promise<GuildMember>}
    */
-  addMember(user, options) {
+  async addMember(user, options) {
     user = this.client.users.resolveID(user);
-    if (!user) return Promise.reject(new TypeError('INVALID_TYPE', 'user', 'UserResolvable'));
-    if (this.members.cache.has(user)) return Promise.resolve(this.members.cache.get(user));
+    if (!user) throw new TypeError('INVALID_TYPE', 'user', 'UserResolvable');
+    if (this.members.cache.has(user)) return this.members.cache.get(user);
     options.access_token = options.accessToken;
     if (options.roles) {
       const roles = [];
       for (let role of options.roles instanceof Collection ? options.roles.values() : options.roles) {
         role = this.roles.resolve(role);
         if (!role) {
-          return Promise.reject(
-            new TypeError('INVALID_TYPE', 'options.roles', 'Array or Collection of Roles or Snowflakes', true),
-          );
+          throw new TypeError('INVALID_TYPE', 'options.roles', 'Array or Collection of Roles or Snowflakes', true);
         }
         roles.push(role.id);
       }
       options.roles = roles;
     }
-    return this.client.api
-      .guilds(this.id)
-      .members(user)
-      .put({ data: options })
-      .then(data => this.members.add(data));
+    const data = await this.client.api.guilds(this.id).members(user).put({ data: options });
+    // Data is an empty buffer if the member is already part of the guild.
+    return data instanceof Buffer ? this.members.fetch(user) : this.members.add(data);
   }
 
   /**

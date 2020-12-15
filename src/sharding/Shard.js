@@ -105,7 +105,7 @@ class Shard extends EventEmitter {
      * @type {Function}
      * @private
      */
-    this._exitListener = this._handleExit.bind(this);
+    this._exitListener = this._handleExit.bind(this, undefined);
 
     this.token = data.token;
   }

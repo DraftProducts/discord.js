@@ -198,7 +198,7 @@ declare module 'discord.js' {
     private _validateOptions(options?: ClientOptions): void;
 
     public channels: ChannelManager;
-    public readonly emojis: GuildEmojiManager;
+    public readonly emojis: BaseGuildEmojiManager;
     public guilds: GuildManager;
     public readyAt: Date | null;
     public readonly readyTimestamp: number | null;
@@ -215,7 +215,7 @@ declare module 'discord.js' {
     public fetchInvite(invite: InviteResolvable): Promise<Invite>;
     public fetchVoiceRegions(): Promise<Collection<string, VoiceRegion>>;
     public fetchWebhook(id: Snowflake, token?: string): Promise<Webhook>;
-    public generateInvite(options?: InviteGenerationOptions | PermissionResolvable): Promise<string>;
+    public generateInvite(options?: InviteGenerationOptions): Promise<string>;
     public login(token?: string): Promise<string>;
     public sweepMessages(lifetime?: number): number;
     public toJSON(): object;
@@ -322,7 +322,6 @@ declare module 'discord.js' {
       keywords: string[];
       bugs: { url: string };
       repository: { type: string; url: string };
-      browser: { [key: string]: boolean };
       scripts: { [key: string]: string };
       engines: { [key: string]: string };
       dependencies: { [key: string]: string };
@@ -330,7 +329,6 @@ declare module 'discord.js' {
       devDependencies: { [key: string]: string };
       [key: string]: any;
     };
-    browser: boolean;
     DefaultOptions: ClientOptions;
     UserAgent: string | null;
     Endpoints: {
@@ -481,59 +479,7 @@ declare module 'discord.js' {
       HELLO: 10;
       HEARTBEAT_ACK: 11;
     };
-    APIErrors: {
-      UNKNOWN_ACCOUNT: 10001;
-      UNKNOWN_APPLICATION: 10002;
-      UNKNOWN_CHANNEL: 10003;
-      UNKNOWN_GUILD: 10004;
-      UNKNOWN_INTEGRATION: 10005;
-      UNKNOWN_INVITE: 10006;
-      UNKNOWN_MEMBER: 10007;
-      UNKNOWN_MESSAGE: 10008;
-      UNKNOWN_OVERWRITE: 10009;
-      UNKNOWN_PROVIDER: 10010;
-      UNKNOWN_ROLE: 10011;
-      UNKNOWN_TOKEN: 10012;
-      UNKNOWN_USER: 10013;
-      UNKNOWN_EMOJI: 10014;
-      UNKNOWN_WEBHOOK: 10015;
-      BOT_PROHIBITED_ENDPOINT: 20001;
-      BOT_ONLY_ENDPOINT: 20002;
-      MAXIMUM_GUILDS: 30001;
-      MAXIMUM_FRIENDS: 30002;
-      MAXIMUM_PINS: 30003;
-      MAXIMUM_ROLES: 30005;
-      MAXIMUM_REACTIONS: 30010;
-      MAXIMUM_CHANNELS: 30013;
-      MAXIMUM_INVITES: 30016;
-      UNAUTHORIZED: 40001;
-      USER_BANNED: 40007;
-      MISSING_ACCESS: 50001;
-      INVALID_ACCOUNT_TYPE: 50002;
-      CANNOT_EXECUTE_ON_DM: 50003;
-      EMBED_DISABLED: 50004;
-      CANNOT_EDIT_MESSAGE_BY_OTHER: 50005;
-      CANNOT_SEND_EMPTY_MESSAGE: 50006;
-      CANNOT_MESSAGE_USER: 50007;
-      CANNOT_SEND_MESSAGES_IN_VOICE_CHANNEL: 50008;
-      CHANNEL_VERIFICATION_LEVEL_TOO_HIGH: 50009;
-      OAUTH2_APPLICATION_BOT_ABSENT: 50010;
-      MAXIMUM_OAUTH2_APPLICATIONS: 50011;
-      INVALID_OAUTH_STATE: 50012;
-      MISSING_PERMISSIONS: 50013;
-      INVALID_AUTHENTICATION_TOKEN: 50014;
-      NOTE_TOO_LONG: 50015;
-      INVALID_BULK_DELETE_QUANTITY: 50016;
-      CANNOT_PIN_MESSAGE_IN_OTHER_CHANNEL: 50019;
-      CANNOT_EXECUTE_ON_SYSTEM_MESSAGE: 50021;
-      INVALID_OAUTH_TOKEN: 50025;
-      BULK_DELETE_MESSAGE_TOO_OLD: 50034;
-      INVALID_FORM_BODY: 50035;
-      INVITE_ACCEPTED_TO_GUILD_NOT_CONTAINING_BOT: 50036;
-      INVALID_API_VERSION: 50041;
-      REACTION_BLOCKED: 90001;
-      RESOURCE_OVERLOADED: 130000;
-    };
+    APIErrors: APIErrors;
     VoiceStatus: {
       CONNECTED: 0;
       CONNECTING: 1;
@@ -566,6 +512,7 @@ declare module 'discord.js' {
       BIG: 2;
     };
     MessageTypes: MessageType[];
+    SystemMessageTypes: SystemMessageType[];
     ActivityTypes: ActivityType[];
     ExplicitContentFilterLevels: ExplicitContentFilterLevel[];
     DefaultMessageNotifications: DefaultMessageNotifications[];
@@ -677,7 +624,6 @@ declare module 'discord.js' {
     public vanityURLUses: number | null;
     public verificationLevel: VerificationLevel;
     public readonly verified: boolean;
-    public readonly voice: VoiceState | null;
     public readonly voiceStates: VoiceStateManager;
     public readonly widgetChannel: TextChannel | null;
     public widgetChannelID: Snowflake | null;
@@ -704,7 +650,6 @@ declare module 'discord.js' {
     public fetchWidget(): Promise<GuildWidget>;
     public iconURL(options?: ImageURLOptions & { dynamic?: boolean }): string | null;
     public leave(): Promise<Guild>;
-    public member(user: UserResolvable): GuildMember | null;
     public setAFKChannel(afkChannel: ChannelResolvable | null, reason?: string): Promise<Guild>;
     public setAFKTimeout(afkTimeout: number, reason?: string): Promise<Guild>;
     public setBanner(banner: Base64Resolvable | null, reason?: string): Promise<Guild>;
@@ -821,7 +766,7 @@ declare module 'discord.js' {
       options?: { lockPermissions?: boolean; reason?: string },
     ): Promise<this>;
     public setPosition(position: number, options?: { relative?: boolean; reason?: string }): Promise<this>;
-    public setTopic(topic: string, reason?: string): Promise<this>;
+    public setTopic(topic: string | null, reason?: string): Promise<this>;
     public updateOverwrite(
       userOrRole: RoleResolvable | UserResolvable,
       options: PermissionOverwriteOption,
@@ -877,7 +822,7 @@ declare module 'discord.js' {
     ): boolean;
     public kick(reason?: string): Promise<GuildMember>;
     public permissionsIn(channel: ChannelResolvable): Readonly<Permissions>;
-    public setNickname(nickname: string, reason?: string): Promise<GuildMember>;
+    public setNickname(nickname: string | null, reason?: string): Promise<GuildMember>;
     public toJSON(): object;
     public toString(): string;
     public valueOf(): string;
@@ -977,7 +922,7 @@ declare module 'discord.js' {
   export class Message extends Base {
     constructor(client: Client, data: object, channel: TextChannel | DMChannel | NewsChannel);
     private _edits: Message[];
-    private patch(data: object): void;
+    private patch(data: object): Message;
 
     public activity: MessageActivity | null;
     public application: ClientApplication | null;
@@ -999,7 +944,7 @@ declare module 'discord.js' {
     public id: Snowflake;
     public readonly member: GuildMember | null;
     public mentions: MessageMentions;
-    public nonce: string | null;
+    public nonce: string | number | null;
     public readonly partial: false;
     public readonly pinnable: boolean;
     public pinned: boolean;
@@ -1011,6 +956,7 @@ declare module 'discord.js' {
     public webhookID: Snowflake | null;
     public flags: Readonly<MessageFlags>;
     public reference: MessageReference | null;
+    public readonly referencedMessage: Message | null;
     public awaitReactions(
       filter: CollectorFilter,
       options?: AwaitReactionsOptions,
@@ -1164,6 +1110,7 @@ declare module 'discord.js' {
     constructor(client: Client, data: object, message: Message);
     private _emoji: GuildEmoji | ReactionEmoji;
 
+    public readonly client: Client;
     public count: number | null;
     public readonly emoji: GuildEmoji | ReactionEmoji;
     public me: boolean;
@@ -1310,6 +1257,7 @@ declare module 'discord.js' {
     public permissions: Readonly<Permissions>;
     public readonly position: number;
     public rawPosition: number;
+    public tags: RoleTagData | null;
     public comparePositionTo(role: Role): number;
     public delete(reason?: string): Promise<Role>;
     public edit(data: RoleData, reason?: string): Promise<Role>;
@@ -1866,11 +1814,6 @@ declare module 'discord.js' {
 
   //#region Managers
 
-  export class ChannelManager extends BaseManager<Snowflake, Channel, ChannelResolvable> {
-    constructor(client: Client, iterable: Iterable<any>);
-    public fetch(id: Snowflake, cache?: boolean, force?: boolean): Promise<Channel>;
-  }
-
   export abstract class BaseManager<K, Holds, R> {
     constructor(client: Client, iterable: Iterable<any>, holds: Constructable<Holds>, cacheType: Collection<K, Holds>);
     public holds: Constructable<Holds>;
@@ -1881,6 +1824,16 @@ declare module 'discord.js' {
     public resolve(resolvable: R): Holds | null;
     public resolveID(resolvable: R): K | null;
     public valueOf(): Collection<K, Holds>;
+  }
+
+  export class BaseGuildEmojiManager extends BaseManager<Snowflake, GuildEmoji, EmojiResolvable> {
+    constructor(client: Client, iterable?: Iterable<any>);
+    public resolveIdentifier(emoji: EmojiIdentifierResolvable): string | null;
+  }
+
+  export class ChannelManager extends BaseManager<Snowflake, Channel, ChannelResolvable> {
+    constructor(client: Client, iterable: Iterable<any>);
+    public fetch(id: Snowflake, cache?: boolean, force?: boolean): Promise<Channel>;
   }
 
   export class GuildChannelManager extends BaseManager<Snowflake, GuildChannel, GuildChannelResolvable> {
@@ -1895,7 +1848,7 @@ declare module 'discord.js' {
     ): Promise<TextChannel | VoiceChannel | CategoryChannel>;
   }
 
-  export class GuildEmojiManager extends BaseManager<Snowflake, GuildEmoji, EmojiResolvable> {
+  export class GuildEmojiManager extends BaseGuildEmojiManager {
     constructor(guild: Guild, iterable?: Iterable<any>);
     public guild: Guild;
     public create(
@@ -1903,7 +1856,6 @@ declare module 'discord.js' {
       name: string,
       options?: GuildEmojiCreateOptions,
     ): Promise<GuildEmoji>;
-    public resolveIdentifier(emoji: EmojiIdentifierResolvable): string | null;
   }
 
   export class GuildEmojiRoleManager {
@@ -1944,6 +1896,8 @@ declare module 'discord.js' {
     public readonly hoist: Role | null;
     public readonly color: Role | null;
     public readonly highest: Role;
+    public readonly premiumSubscriberRole: Role | null;
+    public readonly botRole: Role | null;
     public member: GuildMember;
     public guild: Guild;
 
@@ -2004,10 +1958,11 @@ declare module 'discord.js' {
     public readonly everyone: Role;
     public readonly highest: Role;
     public guild: Guild;
-
+    public readonly premiumSubscriberRole: Role | null;
+    public botRoleFor(user: UserResolvable): Role | null;
     public create(options?: { data?: RoleData; reason?: string }): Promise<Role>;
     public fetch(id: Snowflake, cache?: boolean, force?: boolean): Promise<Role | null>;
-    public fetch(id?: Snowflake, cache?: boolean, force?: boolean): Promise<this>;
+    public fetch(id?: Snowflake, cache?: boolean, force?: boolean): Promise<Collection<Snowflake, Role>>;
   }
 
   export class UserManager extends BaseManager<Snowflake, User, UserResolvable> {
@@ -2115,51 +2070,68 @@ declare module 'discord.js' {
     deaf?: boolean;
   }
 
-  interface APIError {
-    UNKNOWN_ACCOUNT: number;
-    UNKNOWN_APPLICATION: number;
-    UNKNOWN_CHANNEL: number;
-    UNKNOWN_GUILD: number;
-    UNKNOWN_INTEGRATION: number;
-    UNKNOWN_INVITE: number;
-    UNKNOWN_MEMBER: number;
-    UNKNOWN_MESSAGE: number;
-    UNKNOWN_OVERWRITE: number;
-    UNKNOWN_PROVIDER: number;
-    UNKNOWN_ROLE: number;
-    UNKNOWN_TOKEN: number;
-    UNKNOWN_USER: number;
-    UNKNOWN_EMOJI: number;
-    UNKNOWN_WEBHOOK: number;
-    BOT_PROHIBITED_ENDPOINT: number;
-    BOT_ONLY_ENDPOINT: number;
-    MAXIMUM_GUILDS: number;
-    MAXIMUM_FRIENDS: number;
-    MAXIMUM_PINS: number;
-    MAXIMUM_ROLES: number;
-    MAXIMUM_REACTIONS: number;
-    UNAUTHORIZED: number;
-    MISSING_ACCESS: number;
-    INVALID_ACCOUNT_TYPE: number;
-    CANNOT_EXECUTE_ON_DM: number;
-    EMBED_DISABLED: number;
-    CANNOT_EDIT_MESSAGE_BY_OTHER: number;
-    CANNOT_SEND_EMPTY_MESSAGE: number;
-    CANNOT_MESSAGE_USER: number;
-    CANNOT_SEND_MESSAGES_IN_VOICE_CHANNEL: number;
-    CHANNEL_VERIFICATION_LEVEL_TOO_HIGH: number;
-    OAUTH2_APPLICATION_BOT_ABSENT: number;
-    MAXIMUM_OAUTH2_APPLICATIONS: number;
-    INVALID_OAUTH_STATE: number;
-    MISSING_PERMISSIONS: number;
-    INVALID_AUTHENTICATION_TOKEN: number;
-    NOTE_TOO_LONG: number;
-    INVALID_BULK_DELETE_QUANTITY: number;
-    CANNOT_PIN_MESSAGE_IN_OTHER_CHANNEL: number;
-    CANNOT_EXECUTE_ON_SYSTEM_MESSAGE: number;
-    BULK_DELETE_MESSAGE_TOO_OLD: number;
-    INVITE_ACCEPTED_TO_GUILD_NOT_CONTAINING_BOT: number;
-    REACTION_BLOCKED: number;
+  interface APIErrors {
+    UNKNOWN_ACCOUNT: 10001;
+    UNKNOWN_APPLICATION: 10002;
+    UNKNOWN_CHANNEL: 10003;
+    UNKNOWN_GUILD: 10004;
+    UNKNOWN_INTEGRATION: 10005;
+    UNKNOWN_INVITE: 10006;
+    UNKNOWN_MEMBER: 10007;
+    UNKNOWN_MESSAGE: 10008;
+    UNKNOWN_OVERWRITE: 10009;
+    UNKNOWN_PROVIDER: 10010;
+    UNKNOWN_ROLE: 10011;
+    UNKNOWN_TOKEN: 10012;
+    UNKNOWN_USER: 10013;
+    UNKNOWN_EMOJI: 10014;
+    UNKNOWN_WEBHOOK: 10015;
+    UNKNOWN_BAN: 10026;
+    BOT_PROHIBITED_ENDPOINT: 20001;
+    BOT_ONLY_ENDPOINT: 20002;
+    CHANNEL_HIT_WRITE_RATELIMIT: 20028;
+    MAXIMUM_GUILDS: 30001;
+    MAXIMUM_FRIENDS: 30002;
+    MAXIMUM_PINS: 30003;
+    MAXIMUM_ROLES: 30005;
+    MAXIMUM_WEBHOOKS: 30007;
+    MAXIMUM_REACTIONS: 30010;
+    MAXIMUM_CHANNELS: 30013;
+    MAXIMUM_ATTACHMENTS: 30015;
+    MAXIMUM_INVITES: 30016;
+    UNAUTHORIZED: 40001;
+    ACCOUNT_VERIFICATION_REQUIRED: 40002;
+    REQUEST_ENTITY_TOO_LARGE: 40005;
+    FEATURE_TEMPORARILY_DISABLED: 40006;
+    USER_BANNED: 40007;
+    ALREADY_CROSSPOSTED: 40033;
+    MISSING_ACCESS: 50001;
+    INVALID_ACCOUNT_TYPE: 50002;
+    CANNOT_EXECUTE_ON_DM: 50003;
+    EMBED_DISABLED: 50004;
+    CANNOT_EDIT_MESSAGE_BY_OTHER: 50005;
+    CANNOT_SEND_EMPTY_MESSAGE: 50006;
+    CANNOT_MESSAGE_USER: 50007;
+    CANNOT_SEND_MESSAGES_IN_VOICE_CHANNEL: 50008;
+    CHANNEL_VERIFICATION_LEVEL_TOO_HIGH: 50009;
+    OAUTH2_APPLICATION_BOT_ABSENT: 50010;
+    MAXIMUM_OAUTH2_APPLICATIONS: 50011;
+    INVALID_OAUTH_STATE: 50012;
+    MISSING_PERMISSIONS: 50013;
+    INVALID_AUTHENTICATION_TOKEN: 50014;
+    NOTE_TOO_LONG: 50015;
+    INVALID_BULK_DELETE_QUANTITY: 50016;
+    CANNOT_PIN_MESSAGE_IN_OTHER_CHANNEL: 50019;
+    INVALID_OR_TAKEN_INVITE_CODE: 50020;
+    CANNOT_EXECUTE_ON_SYSTEM_MESSAGE: 50021;
+    INVALID_OAUTH_TOKEN: 50025;
+    BULK_DELETE_MESSAGE_TOO_OLD: 50034;
+    INVALID_FORM_BODY: 50035;
+    INVITE_ACCEPTED_TO_GUILD_NOT_CONTAINING_BOT: 50036;
+    INVALID_API_VERSION: 50041;
+    CANNOT_DELETE_COMMUNITY_REQUIRED_CHANNEL: 50074;
+    REACTION_BLOCKED: 90001;
+    RESOURCE_OVERLOADED: 130000;
   }
 
   type APIMessageContentResolvable = string | number | boolean | bigint | symbol | readonly StringResolvable[];
@@ -2297,8 +2269,8 @@ declare module 'discord.js' {
     messageCacheMaxSize?: number;
     messageCacheLifetime?: number;
     messageSweepInterval?: number;
+    messageEditHistoryMaxSize?: number;
     fetchAllMembers?: boolean;
-    disableMentions?: 'none' | 'all' | 'everyone';
     allowedMentions?: MessageMentionOptions;
     partials?: PartialTypes[];
     restWsBridgeTimeout?: number;
@@ -2458,7 +2430,7 @@ declare module 'discord.js' {
     limit?: number;
     withPresences?: boolean;
     time?: number;
-    nonce?: string;
+    nonce?: string | number;
     force?: boolean;
   }
 
@@ -2620,7 +2592,7 @@ declare module 'discord.js' {
     | 'WELCOME_SCREEN_ENABLED';
 
   interface GuildMemberEditData {
-    nick?: string;
+    nick?: string | null;
     roles?: Collection<Snowflake, Role> | readonly RoleResolvable[];
     mute?: boolean;
     deaf?: boolean;
@@ -2795,6 +2767,7 @@ declare module 'discord.js' {
     parse?: MessageMentionTypes[];
     roles?: Snowflake[];
     users?: Snowflake[];
+    repliedUser?: boolean;
   }
 
   type MessageMentionTypes = 'roles' | 'users' | 'everyone';
@@ -2804,12 +2777,11 @@ declare module 'discord.js' {
     nonce?: string;
     content?: StringResolvable;
     embed?: MessageEmbed | MessageEmbedOptions;
-    disableMentions?: 'none' | 'all' | 'everyone';
     allowedMentions?: MessageMentionOptions;
     files?: (FileOptions | BufferResolvable | Stream | MessageAttachment)[];
     code?: string | boolean;
     split?: boolean | SplitOptions;
-    reply?: UserResolvable;
+    replyTo?: MessageResolvable;
   }
 
   type MessageReactionResolvable = MessageReaction | Snowflake;
@@ -2839,7 +2811,8 @@ declare module 'discord.js' {
     | 'USER_PREMIUM_GUILD_SUBSCRIPTION_TIER_3'
     | 'CHANNEL_FOLLOW_ADD'
     | 'GUILD_DISCOVERY_DISQUALIFIED'
-    | 'GUILD_DISCOVERY_REQUALIFIED';
+    | 'GUILD_DISCOVERY_REQUALIFIED'
+    | 'REPLY';
 
   interface OverwriteData {
     allow?: PermissionResolvable;
@@ -2997,6 +2970,7 @@ declare module 'discord.js' {
       | 'attachments'
       | 'channel'
       | 'deletable'
+      | 'crosspostable'
       | 'editable'
       | 'mentions'
       | 'pinnable'
@@ -3008,6 +2982,7 @@ declare module 'discord.js' {
     attachments: Message['attachments'];
     channel: Message['channel'];
     readonly deletable: boolean;
+    readonly crosspostable: boolean;
     readonly editable: boolean;
     readonly edits: Message['edits'];
     embeds: Message['embeds'];
@@ -3081,6 +3056,12 @@ declare module 'discord.js' {
 
   type RoleResolvable = Role | string;
 
+  interface RoleTagData {
+    botID?: Snowflake;
+    integrationID?: Snowflake;
+    premiumSubscriberRole?: true;
+  }
+
   type Snowflake = string;
 
   interface SplitOptions {
@@ -3112,6 +3093,8 @@ declare module 'discord.js' {
 
   type SystemChannelFlagsResolvable = BitFieldResolvable<SystemChannelFlagsString>;
 
+  type SystemMessageType = Exclude<MessageType, 'DEFAULT' | 'REPLY'>;
+
   type TargetUser = number;
 
   interface TypingData {
@@ -3125,7 +3108,6 @@ declare module 'discord.js' {
   type UserFlagsString =
     | 'DISCORD_EMPLOYEE'
     | 'PARTNERED_SERVER_OWNER'
-    | 'DISCORD_PARTNER'
     | 'HYPESQUAD_EVENTS'
     | 'BUGHUNTER_LEVEL_1'
     | 'HOUSE_BRAVERY'
@@ -3136,8 +3118,7 @@ declare module 'discord.js' {
     | 'SYSTEM'
     | 'BUGHUNTER_LEVEL_2'
     | 'VERIFIED_BOT'
-    | 'EARLY_VERIFIED_DEVELOPER'
-    | 'VERIFIED_DEVELOPER';
+    | 'EARLY_VERIFIED_DEVELOPER';
 
   type UserResolvable = User | Snowflake | Message | GuildMember;
 
@@ -3158,7 +3139,6 @@ declare module 'discord.js' {
     tts?: boolean;
     nonce?: string;
     embeds?: (MessageEmbed | object)[];
-    disableMentions?: 'none' | 'all' | 'everyone';
     allowedMentions?: MessageMentionOptions;
     files?: (FileOptions | BufferResolvable | Stream | MessageAttachment)[];
     code?: string | boolean;

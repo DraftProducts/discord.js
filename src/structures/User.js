@@ -42,12 +42,14 @@ class User extends Base {
       this.username = null;
     }
 
-    /**
-     * Whether or not the user is a bot
-     * @type {boolean}
-     * @name User#bot
-     */
-    this.bot = Boolean(data.bot);
+    if ('bot' in data || typeof this.bot !== 'boolean') {
+      /**
+       * Whether or not the user is a bot
+       * @type {boolean}
+       * @name User#bot
+       */
+      this.bot = Boolean(data.bot);
+    }
 
     if ('discriminator' in data) {
       /**
@@ -78,15 +80,6 @@ class User extends Base {
        * @name User#system
        */
       this.system = Boolean(data.system);
-    }
-
-    if ('locale' in data) {
-      /**
-       * The locale of the user's client (ISO 639-1)
-       * @type {?string}
-       * @name User#locale
-       */
-      this.locale = data.locale;
     }
 
     if ('public_flags' in data) {

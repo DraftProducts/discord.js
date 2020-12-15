@@ -5,13 +5,11 @@ const DiscordAPIError = require('./DiscordAPIError');
 const HTTPError = require('./HTTPError');
 const {
   Events: { RATE_LIMIT },
-  browser,
 } = require('../util/Constants');
 const Util = require('../util/Util');
 
 function parseResponse(res) {
   if (res.headers.get('content-type').startsWith('application/json')) return res.json();
-  if (browser) return res.blob();
   return res.buffer();
 }
 
@@ -97,7 +95,7 @@ class RequestHandler {
       return this.execute(request);
     }
 
-    if (res && res.headers) {
+    if (res.headers) {
       const serverDate = res.headers.get('date');
       const limit = res.headers.get('x-ratelimit-limit');
       const remaining = res.headers.get('x-ratelimit-remaining');

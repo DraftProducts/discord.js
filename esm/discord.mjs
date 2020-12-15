@@ -27,6 +27,7 @@ export const {
   SystemChannelFlags,
   Util,
   version,
+  BaseGuildEmojiManager,
   ChannelManager,
   GuildChannelManager,
   GuildEmojiManager,

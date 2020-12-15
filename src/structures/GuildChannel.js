@@ -52,7 +52,7 @@ class GuildChannel extends Channel {
      * The ID of the category parent of this channel
      * @type {?Snowflake}
      */
-    this.parentID = data.parent_id;
+    this.parentID = data.parent_id || null;
 
     /**
      * A map of permission overwrites in this channel for roles and users
@@ -412,7 +412,7 @@ class GuildChannel extends Channel {
 
   /**
    * Sets a new topic for the guild channel.
-   * @param {string} topic The new topic for the guild channel
+   * @param {?string} topic The new topic for the guild channel
    * @param {string} [reason] Reason for changing the guild channel's topic
    * @returns {Promise<GuildChannel>}
    * @example
