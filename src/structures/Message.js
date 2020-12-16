@@ -616,13 +616,32 @@ class Message extends Base {
    * @param {MessageResolvable} [options.replyTo=this] The message to reply to
    * @returns {Promise<Message|Message[]>}
    */
-  reply(content, options) {
+  replyTo(content, options) {
     return this.channel.send(
       content instanceof APIMessage
         ? content
         : APIMessage.transformOptions(content, options, {
             replyTo: this,
           }),
+    );
+  }
+
+  /**
+   * Replies to the message.
+   * @param {StringResolvable|APIMessage} [content=''] The content for the message
+   * @param {MessageOptions|MessageAdditions} [options={}] The options to provide
+   * @returns {Promise<Message|Message[]>}
+   * @example
+   * // Reply to a message
+   * message.reply('Hey, I\'m a reply!')
+   *   .then(() => console.log(`Sent a reply to ${message.author.username}`))
+   *   .catch(console.error);
+   */
+  reply(content, options) {
+    return this.channel.send(
+      content instanceof APIMessage
+        ? content
+        : APIMessage.transformOptions(content, options, { reply: this.member || this.author }),
     );
   }
 
