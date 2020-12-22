@@ -15,12 +15,9 @@ const Util = require('../util/Util');
 class Shard extends EventEmitter {
   /**
    * @param {ShardingManager} manager Manager that is creating this shard
-   * @param {Object} data Data of the shard to create
-   * @param {number} data.shardID ID of the shard to create
-   * @param {boolean} data.premium Premium status of the shard to create
-   * @param {boolean} data.custom Custom status of the shard to create
+   * @param {number} id ID of this shard
    */
-  constructor(manager, data) {
+  constructor(manager, id) {
     super();
 
     /**
@@ -33,24 +30,7 @@ class Shard extends EventEmitter {
      * ID of the shard in the manager
      * @type {number}
      */
-    this.id = data.shardID;
-
-    /**
-     * Arguments for the shard's process)
-     * @type {string[]}
-     */
-    this.args = [
-      data.token,
-      data.premium ? 'premium' : 'regular',
-      data.custom ? 'custom' : 'regular',
-      ...(data.shardArgs || []),
-    ];
-
-    /**
-     * Arguments for the shard's process executable)
-     * @type {?string[]}
-     */
-    this.execArgv = data.shardArgs;
+    this.id = id;
 
     /**
      * Environment variables for the shard's process
@@ -59,7 +39,7 @@ class Shard extends EventEmitter {
     this.env = Object.assign({}, process.env, {
       SHARDING_MANAGER: true,
       SHARD_COUNT: this.manager.totalShards,
-      SHARDS: data.shardID,
+      SHARDS: id,
     });
 
     /**
@@ -67,18 +47,6 @@ class Shard extends EventEmitter {
      * @type {boolean}
      */
     this.ready = false;
-
-    /**
-     * Whether the shard's {@link Client} is premium
-     * @type {boolean}
-     */
-    this.premium = data.premium;
-
-    /**
-     * Whether the shard's {@link Client} is custom
-     * @type {boolean}
-     */
-    this.custom = data.custom;
 
     /**
      * Process of the shard
@@ -107,7 +75,7 @@ class Shard extends EventEmitter {
      */
     this._exitListener = this._handleExit.bind(this, undefined);
 
-    this.token = data.token;
+    this.token = manager.token;
   }
 
   /**
@@ -121,9 +89,8 @@ class Shard extends EventEmitter {
     if (this.process) throw new Error('SHARDING_PROCESS_EXISTS', this.id);
 
     this.process = childProcess
-      .fork(path.resolve(this.manager.file), this.args, {
+      .fork(path.resolve(this.manager.file), {
         env: this.env,
-        execArgv: this.execArgv,
       })
       .on('message', this._handleMessage.bind(this))
       .on('exit', this._exitListener);

@@ -4,7 +4,7 @@ const EventEmitter = require('events');
 const fs = require('fs');
 const path = require('path');
 const Shard = require('./Shard');
-const { Error, TypeError, RangeError } = require('../errors');
+const { Error } = require('../errors');
 const Collection = require('../util/Collection');
 const Util = require('../util/Util');
 
@@ -20,9 +20,10 @@ const Util = require('../util/Util');
 class ShardingManager extends EventEmitter {
   /**
    * @param {string} file Path to your shard script file
-   * @param {Object[]} shardList Shards list for the sharding manager
+   * @param {number} amount Shards count for the sharding manager
+   * @param {number} token Shards count for the sharding manager
    */
-  constructor(file, shardList) {
+  constructor(file, amount, token) {
     super();
 
     /**
@@ -39,16 +40,13 @@ class ShardingManager extends EventEmitter {
      * List of shards this sharding manager spawns
      * @type {string|number[]}
      */
-    this.shardList = shardList || [];
-
-    if (!Array.isArray(shardList)) throw new TypeError('CLIENT_INVALID_OPTION', 'shardList', 'an array.');
-    if (shardList.length < 1) throw new RangeError('CLIENT_INVALID_OPTION', 'shardList', 'at least 1 ID.');
+    this.shardList = [...Array(amount).keys()];
 
     /**
      * Amount of shards that all sharding managers spawn in total
      * @type {number}
      */
-    this.totalShards = shardList.length;
+    this.totalShards = amount;
 
     /**
      * A collection of shards that this manager has spawned
@@ -56,22 +54,24 @@ class ShardingManager extends EventEmitter {
      */
     this.shards = new Collection();
 
+    /**
+     * Token of the bot
+     * @type {string}
+     */
+    this.token = token;
+
     process.env.SHARDING_MANAGER = true;
   }
 
   /**
    * Creates a single shard.
    * <warn>Using this method is usually not necessary if you use the spawn method.</warn>
-   * @param {Object} data Data of the shard to create
-   * @param {number} data.shardID ID of the shard to create
-   * @param {string} data.token token of the shard to create
-   * @param {boolean} data.premium Premium status of the shard to create
-   * @param {boolean} data.custom Custom status of the shard to create
+   * @param {number} shardID ID of the shard to create
    * @returns {Shard} Note that the created shard needs to be explicitly spawned using its spawn method.
    */
-  createShard(data) {
-    const shard = new Shard(this, data);
-    this.shards.set(data.shardID, shard);
+  createShard(shardID) {
+    const shard = new Shard(this, shardID);
+    this.shards.set(shardID, shard);
     return shard;
   }
 
@@ -83,19 +83,12 @@ class ShardingManager extends EventEmitter {
    * @returns {Promise<Collection<number, Shard>>}
    */
   async spawn(delay = 5500, spawnTimeout) {
-    const premium_length = this.shardList.filter(s => s.premium).length;
     // Spawn the shards
-    for (const data of this.shardList) {
+    for (const shardID of this.shardList) {
       const promises = [];
-      const shard = this.createShard(data);
+      const shard = this.createShard(shardID);
       promises.push(shard.spawn(spawnTimeout));
-      if (
-        delay > 0 &&
-        this.shards.size !== this.shardList.length &&
-        (!data.premium || this.shards.size !== premium_length)
-      ) {
-        promises.push(Util.delayFor(delay));
-      }
+      if (delay > 0 && this.shards.size !== this.shardList.length) promises.push(Util.delayFor(delay));
       await Promise.all(promises); // eslint-disable-line no-await-in-loop
     }
 
