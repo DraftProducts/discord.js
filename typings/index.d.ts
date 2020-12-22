@@ -1329,7 +1329,7 @@ declare module 'discord.js' {
   }
 
   export class ShardingManager extends EventEmitter {
-    constructor(file: string, shardList: Object[]);
+    constructor(file: string, shardCount: number, token: string);
 
     public file: string;
     public shards: Collection<number, Shard>;
@@ -1820,7 +1820,7 @@ declare module 'discord.js' {
     public cache: Collection<K, Holds>;
     public cacheType: Collection<K, Holds>;
     public readonly client: Client;
-    public add(data: any, cache?: boolean, { id, extras }?: { id: K; extras: any[] }): Holds;
+    public add(data: any, cache?: boolean, extras?: { id: K; extras: any[] }): Holds;
     public resolve(resolvable: R): Holds | null;
     public resolveID(resolvable: R): K | null;
     public valueOf(): Collection<K, Holds>;

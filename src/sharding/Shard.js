@@ -89,8 +89,9 @@ class Shard extends EventEmitter {
     if (this.process) throw new Error('SHARDING_PROCESS_EXISTS', this.id);
 
     this.process = childProcess
-      .fork(path.resolve(this.manager.file), {
+      .fork(path.resolve(this.manager.file), [], {
         env: this.env,
+        execArgv: [],
       })
       .on('message', this._handleMessage.bind(this))
       .on('exit', this._exitListener);

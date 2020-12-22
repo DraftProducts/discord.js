@@ -35,12 +35,6 @@ class Client extends BaseClient {
 
     // Obtain shard details from environment or if present, worker threads
     let data = process.env;
-    try {
-      // Test if worker threads module is present and used
-      data = require('worker_threads').workerData || data;
-    } catch {
-      // Do nothing
-    }
 
     if (this.options.shards === DefaultOptions.shards) {
       if ('SHARDS' in data) {
@@ -191,20 +185,11 @@ class Client extends BaseClient {
    */
   async login(token = this.token) {
     if (!token || typeof token !== 'string') throw new Error('TOKEN_INVALID');
-    this.token = token = token.replace(/^(Bot|Bearer)\s*/i, '');
-    this.emit(
-      Events.DEBUG,
-      `Provided token: ${token
-        .split('.')
-        .map((val, i) => (i > 1 ? val.replace(/./g, '*') : val))
-        .join('.')}`,
-    );
+    this.token = token.replace(/^(Bot|Bearer)\s*/i, '');
 
     if (this.options.presence) {
       this.options.ws.presence = await this.presence._parse(this.options.presence);
     }
-
-    this.emit(Events.DEBUG, 'Preparing to connect to the gateway...');
 
     try {
       await this.ws.connect();
