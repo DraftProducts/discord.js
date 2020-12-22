@@ -595,16 +595,9 @@ class WebSocketShard extends EventEmitter {
     const d = {
       ...client.options.ws,
       token: client.token,
-      shard: !client.isPremium
-        ? [this.id - Number(process.env.premium_shards), Number(process.env.regular_shards)]
-        : [this.id, Number(process.env.premium_shards)],
+      shard: [this.id, Number(client.options.shardCount)],
     };
-
-    this.debug(
-      `[IDENTIFY] Shard ${this.id + (!client.isPremium ? Number(process.env.premium_shards) : 0)}/${
-        process.env[`${client.isPremium ? 'premium' : 'regular'}_shards`]
-      }`,
-    );
+    this.debug(`[IDENTIFY] Shard ${this.id}/${client.options.shardCount}`);
     this.send({ op: OPCodes.IDENTIFY, d }, true);
   }
 
