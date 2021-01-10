@@ -7,9 +7,6 @@ module.exports = (client, { d: data }) => {
   const time = new Date(data.last_pin_timestamp);
 
   if (channel && !Number.isNaN(time.getTime())) {
-    // Discord sends null for last_pin_timestamp if the last pinned message was removed
-    channel.lastPinTimestamp = time.getTime() || null;
-
     /**
      * Emitted whenever the pins of a channel are updated. Due to the nature of the WebSocket event,
      * not much information can be provided easily here - you need to manually check the pins yourself.

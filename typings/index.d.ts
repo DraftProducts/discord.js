@@ -801,7 +801,6 @@ declare module 'discord.js' {
     public readonly joinedAt: Date | null;
     public joinedTimestamp: number | null;
     public readonly kickable: boolean;
-    public lastMessageChannelID: Snowflake | null;
     public readonly manageable: boolean;
     public nickname: string | null;
     public readonly partial: false;
@@ -1471,7 +1470,6 @@ declare module 'discord.js' {
     public readonly dmChannel: DMChannel | null;
     public flags?: Readonly<UserFlags>;
     public id: Snowflake;
-    public lastMessageID: Snowflake | null;
     public locale?: string;
     public readonly partial: false;
     public readonly presence: Presence;
@@ -1992,8 +1990,6 @@ declare module 'discord.js' {
   ): Constructable<T & Omit<TextBasedChannelFields, I>>;
 
   interface PartialTextBasedChannelFields {
-    lastMessageID: Snowflake | null;
-    readonly lastMessage: Message | null;
     send(
       content: APIMessageContentResolvable | (MessageOptions & { split?: false }) | MessageAdditions,
     ): Promise<Message>;
@@ -2006,8 +2002,6 @@ declare module 'discord.js' {
 
   interface TextBasedChannelFields extends PartialTextBasedChannelFields {
     _typing: Map<string, TypingData>;
-    lastPinTimestamp: number | null;
-    readonly lastPinAt: Date;
     typing: boolean;
     typingCount: number;
     awaitMessages(filter: CollectorFilter, options?: AwaitMessagesOptions): Promise<Collection<Snowflake, Message>>;
@@ -2910,10 +2904,8 @@ declare module 'discord.js' {
   interface PartialDMChannel
     extends Partialize<
       DMChannel,
-      'lastMessage' | 'lastMessageID' | 'messages' | 'recipient' | 'type' | 'typing' | 'typingCount'
+      'messages' | 'recipient' | 'type' | 'typing' | 'typingCount'
     > {
-    lastMessage: null;
-    lastMessageID: undefined;
     messages: MessageManager;
     recipient: User | PartialUser;
     type: 'dm';

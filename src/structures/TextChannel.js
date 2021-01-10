@@ -46,22 +46,10 @@ class TextChannel extends GuildChannel {
     if (typeof data.nsfw !== 'undefined') this.nsfw = Boolean(data.nsfw);
 
     /**
-     * The ID of the last message sent in this channel, if one was sent
-     * @type {?Snowflake}
-     */
-    this.lastMessageID = data.last_message_id;
-
-    /**
      * The ratelimit per user for this channel in seconds
      * @type {number}
      */
     this.rateLimitPerUser = data.rate_limit_per_user || 0;
-
-    /**
-     * The timestamp when the last pinned message was pinned, if there was one
-     * @type {?number}
-     */
-    this.lastPinTimestamp = data.last_pin_timestamp ? new Date(data.last_pin_timestamp).getTime() : null;
 
     if (data.messages) for (const message of data.messages) this.messages.add(message);
   }
@@ -136,8 +124,6 @@ class TextChannel extends GuildChannel {
 
   // These are here only for documentation purposes - they are implemented by TextBasedChannel
   /* eslint-disable no-empty-function */
-  get lastMessage() {}
-  get lastPinAt() {}
   send() {}
   startTyping() {}
   stopTyping() {}
