@@ -137,6 +137,18 @@ class TextBasedChannel {
   }
 
   /**
+   * Responds with an embed
+   * @param {RichEmbed|Object} embed - Embed to send
+   * @param {StringResolvable} [content] - Content for the message
+   * @param {MessageOptions} [options] - Options for the message
+   * @returns {Promise<Message|Message[]>}
+   */
+  embed(embed, content = '', options = {}) {
+    options.embed = embed;
+    return this.send(content, options);
+  }
+
+  /**
    * Starts a typing indicator in the channel.
    * @param {number} [count=1] The number of times startTyping should be considered to have been called
    * @returns {Promise} Resolves once the bot stops typing gracefully, or rejects when an error occurs
