@@ -62,6 +62,7 @@ class DMChannel extends Channel {
   // These are here only for documentation purposes - they are implemented by TextBasedChannel
   /* eslint-disable no-empty-function */
   send() {}
+  embed() {}
   startTyping() {}
   stopTyping() {}
   get typing() {}

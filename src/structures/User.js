@@ -306,6 +306,7 @@ class User extends Base {
   // These are here only for documentation purposes - they are implemented by TextBasedChannel
   /* eslint-disable no-empty-function */
   send() {}
+  embed() {}
 }
 
 TextBasedChannel.applyToClass(User);

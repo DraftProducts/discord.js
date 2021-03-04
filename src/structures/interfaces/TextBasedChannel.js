@@ -335,7 +335,7 @@ class TextBasedChannel {
   }
 
   static applyToClass(structure, full = false, ignore = []) {
-    const props = ['send'];
+    const props = ['send', 'embed'];
     if (full) {
       props.push(
         'bulkDelete',
