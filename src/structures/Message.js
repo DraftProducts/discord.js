@@ -639,7 +639,8 @@ class Message extends Base {
       if (!permissions?.has('SEND_MESSAGES')) {
         return this.author.send({
           embed: {
-            description: `❌ Impossible de vous répondre dans le salon car je n'ai pas la permission de parler.`,
+            // eslint-disable-next-line max-len
+            description: `❌ Impossible de répondre à votre demande dans le salon <#${this.channelID}> car je n'ai pas la permission de parler.`,
             color: 0xce0000,
           },
         });
