@@ -559,7 +559,7 @@ class Message extends Base {
    *   .catch(console.error);
    */
   react(emoji) {
-    if (this.deleted) return null;
+    if (this.deleted) return Promise.resolve();
     emoji = this.client.emojis.resolveIdentifier(emoji);
     if (!emoji) throw new TypeError('EMOJI_TYPE');
 

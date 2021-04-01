@@ -12,7 +12,7 @@ class Channel extends Base {
   constructor(client, data) {
     super(client);
 
-    const type = Object.keys(ChannelTypes)[data.type];
+    const type = Object.keys(ChannelTypes)[data?.type];
     /**
      * The type of the channel, either:
      * * `dm` - a DM channel
