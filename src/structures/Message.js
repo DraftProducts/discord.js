@@ -640,7 +640,7 @@ class Message extends Base {
         return this.author.send({
           embed: {
             // eslint-disable-next-line max-len
-            description: `❌ Impossible de répondre à votre demande dans le salon <#${this.channelID}> car je n'ai pas la permission de parler.`,
+            description: `❌ Impossible de répondre à votre demande dans le salon <#${this.channel.id}> car je n'ai pas la permission de parler.`,
             color: 0xce0000,
           },
         });
